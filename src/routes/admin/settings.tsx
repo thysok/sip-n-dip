@@ -49,6 +49,7 @@ function AdminSettingsPage() {
         address: settings.address ?? "",
         phone: settings.phone ?? "",
         email: settings.email ?? "",
+        orderLink: settings.orderLink ?? "",
         monday: hours.monday ?? "",
         tuesday: hours.tuesday ?? "",
         wednesday: hours.wednesday ?? "",
@@ -79,6 +80,7 @@ function AdminSettingsPage() {
     await setSetting({ key: "address", value: form.address ?? "" });
     await setSetting({ key: "phone", value: form.phone ?? "" });
     await setSetting({ key: "email", value: form.email ?? "" });
+    await setSetting({ key: "orderLink", value: form.orderLink ?? "" });
     await setSetting({ key: "hours", value: JSON.stringify(hours) });
     setSaved(true);
   };
@@ -125,6 +127,7 @@ function AdminSettingsPage() {
             <Field label="Address" field="address" />
             <Field label="Phone" field="phone" type="tel" />
             <Field label="Email" field="email" type="email" />
+            <Field label="Order Link (URL)" field="orderLink" type="url" />
           </div>
         </div>
 

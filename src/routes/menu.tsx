@@ -3,11 +3,14 @@ import { useQuery } from "convex/react";
 import { api } from "../../convex/_generated/api";
 import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Phone } from "lucide-react";
 import SectionHeading from "../components/ui/SectionHeading";
 import Badge from "../components/ui/Badge";
 import DonutSpinner from "../components/ui/DonutSpinner";
-import { cn, formatPrice } from "../lib/utils";
+import { ExternalLink, ShoppingCart } from "lucide-react";
+import { cn } from "../lib/utils";
+
+const ORDER_URL =
+  "https://www.getsauce.com/order/sip-n-dip/menu?utm_source=wp-site&utm_medium=order-now";
 
 export const Route = createFileRoute("/menu")({
   component: MenuPage,
@@ -73,9 +76,25 @@ function MenuCard({ item, i, categoryName }: { item: any; i: number; categoryNam
         <p className="mb-4 flex-1 text-sm leading-relaxed text-[var(--text-muted)]">
           {item.description}
         </p>
-        <p className="text-xl font-bold text-[var(--donut-pink)]">
-          {formatPrice(item.price)}
-        </p>
+        {item.orderLink ? (
+          <a
+            href={item.orderLink}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="btn-primary"
+          >
+            <ShoppingCart size={14} /> Add to Cart
+          </a>
+        ) : (
+          <a
+            href={ORDER_URL}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="btn-primary"
+          >
+            <ShoppingCart size={14} /> Add to Cart
+          </a>
+        )}
       </div>
     </motion.article>
   );
@@ -84,10 +103,7 @@ function MenuCard({ item, i, categoryName }: { item: any; i: number; categoryNam
 function MenuPage() {
   const categories = useQuery(api.categories.listActive);
   const menuItems = useQuery(api.menuItems.listActive);
-  const settings = useQuery(api.shopSettings.getAll);
   const [activeCategory, setActiveCategory] = useState<string>("all");
-
-  const phone = settings?.phone ?? "(407) 892-1252";
 
   const filtered =
     activeCategory === "all"
@@ -114,10 +130,17 @@ function MenuPage() {
           animate={{ opacity: 1 }}
           transition={{ delay: 0.3 }}
         >
-          <p className="flex items-center justify-center gap-2 text-sm font-semibold text-[var(--donut-pink)]">
-            <Phone size={16} />
-            Call us or visit to place an order! {phone}
+          <p className="mb-2 text-sm font-semibold text-[var(--donut-pink)]">
+            Order online for pickup or delivery!
           </p>
+          <a
+            href={ORDER_URL}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="btn-primary"
+          >
+            Order Now <ExternalLink size={14} />
+          </a>
         </motion.div>
 
         {/* Category Filter */}

@@ -29,6 +29,7 @@ type EditingItem = {
   price: number;
   categoryId: Id<"categories"> | "";
   badge?: string;
+  orderLink?: string;
   isActive: boolean;
   displayOrder: number;
   imageId?: Id<"_storage">;
@@ -203,6 +204,7 @@ function AdminMenuPage() {
         price: item.price,
         categoryId: item.categoryId as Id<"categories">,
         badge: item.badge || undefined,
+        orderLink: item.orderLink || undefined,
         isActive: item.isActive,
         displayOrder: item.displayOrder,
         ...(item.imageId ? { imageId: item.imageId } : {}),
@@ -214,6 +216,7 @@ function AdminMenuPage() {
         price: item.price,
         categoryId: item.categoryId as Id<"categories">,
         badge: item.badge || undefined,
+        orderLink: item.orderLink || undefined,
         isActive: item.isActive,
         displayOrder: item.displayOrder,
         ...(item.imageId ? { imageId: item.imageId } : {}),
@@ -298,6 +301,7 @@ function AdminMenuPage() {
             price: item.price,
             categoryId: item.categoryId,
             badge: item.badge,
+            orderLink: item.orderLink ?? "",
             isActive: item.isActive,
             displayOrder: item.displayOrder,
             imageId: item.imageId,
@@ -477,6 +481,23 @@ function AdminMenuPage() {
                     <option value="new">New</option>
                     <option value="popular">Popular</option>
                   </select>
+                </div>
+                <div>
+                  <label className="mb-1 block text-sm font-semibold text-[var(--text-secondary)]">
+                    Order Link (GetSauce URL)
+                  </label>
+                  <input
+                    type="url"
+                    placeholder="https://www.getsauce.com/order/..."
+                    value={editingItem.orderLink ?? ""}
+                    onChange={(e) =>
+                      setEditingItem({
+                        ...editingItem,
+                        orderLink: e.target.value,
+                      })
+                    }
+                    className="w-full rounded-xl border border-[var(--line)] bg-[var(--surface-strong)] px-4 py-2.5 text-sm text-[var(--text-primary)] outline-none focus:border-[var(--donut-pink)]"
+                  />
                 </div>
                 <div>
                   <label className="mb-1 block text-sm font-semibold text-[var(--text-secondary)]">

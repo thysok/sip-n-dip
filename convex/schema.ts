@@ -16,6 +16,7 @@ export default defineSchema({
     imageId: v.optional(v.id("_storage")),
     categoryId: v.id("categories"),
     badge: v.optional(v.string()),
+    orderLink: v.optional(v.string()),
     isActive: v.boolean(),
     displayOrder: v.number(),
   }).index("by_category", ["categoryId"]),

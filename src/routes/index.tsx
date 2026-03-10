@@ -189,11 +189,8 @@ function HomePage() {
                     <h3 className="mb-1 text-base font-bold text-[var(--text-primary)]">
                       {donut.name}
                     </h3>
-                    <p className="mb-3 text-sm text-[var(--text-muted)]">
+                    <p className="text-sm text-[var(--text-muted)]">
                       {donut.description}
-                    </p>
-                    <p className="text-lg font-bold text-[var(--donut-pink)]">
-                      ${donut.price.toFixed(2)}
                     </p>
                   </div>
                 </motion.article>
