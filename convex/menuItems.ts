@@ -87,3 +87,12 @@ export const remove = mutation({
     await ctx.db.delete(id);
   },
 });
+
+export const reorder = mutation({
+  args: { ids: v.array(v.id("menuItems")) },
+  handler: async (ctx, { ids }) => {
+    for (let i = 0; i < ids.length; i++) {
+      await ctx.db.patch(ids[i], { displayOrder: i });
+    }
+  },
+});

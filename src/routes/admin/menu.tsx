@@ -1,9 +1,9 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useQuery, useMutation } from "convex/react";
 import { api } from "../../../convex/_generated/api";
-import type { Id, Doc } from "../../../convex/_generated/dataModel";
+import type { Id } from "../../../convex/_generated/dataModel";
 import { useState, useRef } from "react";
-import { motion, AnimatePresence } from "framer-motion";
+import { motion, AnimatePresence, Reorder } from "framer-motion";
 import {
   Plus,
   Pencil,
@@ -35,12 +35,116 @@ type EditingItem = {
   imageUrl?: string | null;
 };
 
+function CategoryReorderGroup({
+  items,
+  categoryMap,
+  onReorder,
+  onToggleActive,
+  onEdit,
+  onDelete,
+}: {
+  items: any[];
+  categoryMap: Map<string, string>;
+  onReorder: (args: { ids: Id<"menuItems">[] }) => void;
+  onToggleActive: (id: Id<"menuItems">, current: boolean) => void;
+  onEdit: (item: any) => void;
+  onDelete: (id: Id<"menuItems">) => void;
+}) {
+  return (
+    <Reorder.Group
+      axis="y"
+      values={items}
+      onReorder={(newOrder) => {
+        onReorder({ ids: newOrder.map((item: any) => item._id) });
+      }}
+      className="space-y-3"
+    >
+      {items.map((item: any) => (
+        <Reorder.Item
+          key={item._id}
+          value={item}
+          className={cn(
+            "card-shell flex items-center gap-4 rounded-xl p-4",
+            !item.isActive && "opacity-50"
+          )}
+        >
+          <GripVertical
+            size={16}
+            className="shrink-0 cursor-grab text-[var(--text-muted)] active:cursor-grabbing"
+          />
+
+          {item.imageUrl ? (
+            <img
+              src={item.imageUrl}
+              alt={item.name}
+              className="h-10 w-10 shrink-0 rounded-lg object-cover"
+            />
+          ) : (
+            <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-[var(--donut-pink-soft)] text-lg">
+              {categoryMap.get(item.categoryId)?.includes("Smoothie") || categoryMap.get(item.categoryId)?.includes("Milk Tea")
+                ? "☕"
+                : categoryMap.get(item.categoryId)?.includes("Bundle")
+                  ? "🎁"
+                  : "🍩"}
+            </div>
+          )}
+
+          <div className="min-w-0 flex-1">
+            <div className="flex items-center gap-2">
+              <p className="truncate font-semibold text-[var(--text-primary)]">
+                {item.name}
+              </p>
+              {item.badge && <Badge type={item.badge} />}
+            </div>
+            <p className="truncate text-xs text-[var(--text-muted)]">
+              {categoryMap.get(item.categoryId) ?? "Unknown"} ·{" "}
+              {item.description}
+            </p>
+          </div>
+
+          <p className="shrink-0 font-bold text-[var(--donut-pink)]">
+            {formatPrice(item.price)}
+          </p>
+
+          <div className="flex shrink-0 gap-1">
+            <button
+              type="button"
+              onClick={() => onToggleActive(item._id, item.isActive)}
+              className="rounded-lg p-2 text-[var(--text-muted)] transition hover:bg-[var(--donut-pink-soft)]"
+              title={item.isActive ? "Hide item" : "Show item"}
+            >
+              {item.isActive ? <Eye size={16} /> : <EyeOff size={16} />}
+            </button>
+            <button
+              type="button"
+              onClick={() => onEdit(item)}
+              className="rounded-lg p-2 text-[var(--text-muted)] transition hover:bg-[var(--donut-pink-soft)]"
+              title="Edit"
+            >
+              <Pencil size={16} />
+            </button>
+            <button
+              type="button"
+              onClick={() => onDelete(item._id)}
+              className="rounded-lg p-2 text-[var(--text-muted)] transition hover:bg-red-50 hover:text-red-500"
+              title="Delete"
+            >
+              <Trash2 size={16} />
+            </button>
+          </div>
+        </Reorder.Item>
+      ))}
+    </Reorder.Group>
+  );
+}
+
 function AdminMenuPage() {
   const items = useQuery(api.menuItems.list);
   const categories = useQuery(api.categories.list);
   const createItem = useMutation(api.menuItems.create);
   const updateItem = useMutation(api.menuItems.update);
   const removeItem = useMutation(api.menuItems.remove);
+  const reorderItems = useMutation(api.menuItems.reorder);
   const generateUploadUrl = useMutation(api.files.generateUploadUrl);
 
   const [editingItem, setEditingItem] = useState<EditingItem | null>(null);
@@ -180,101 +284,63 @@ function AdminMenuPage() {
       </div>
 
       {/* Items list */}
-      <div className="space-y-3">
-        <AnimatePresence>
-          {filteredItems.map((item) => (
-            <motion.div
-              key={item._id}
-              layout
-              initial={{ opacity: 0, y: 8 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, x: -20 }}
-              className={cn(
-                "card-shell flex items-center gap-4 rounded-xl p-4",
-                !item.isActive && "opacity-50"
-              )}
-            >
-              <GripVertical
-                size={16}
-                className="shrink-0 cursor-grab text-[var(--text-muted)]"
-              />
-
-              {item.imageUrl ? (
-                <img
-                  src={item.imageUrl}
-                  alt={item.name}
-                  className="h-10 w-10 shrink-0 rounded-lg object-cover"
+      {filterCategory !== "all" ? (
+        <CategoryReorderGroup
+          items={filteredItems}
+          categoryMap={categoryMap}
+          onReorder={reorderItems}
+          onToggleActive={toggleActive}
+          onEdit={(item) => setEditingItem({
+            _id: item._id,
+            name: item.name,
+            description: item.description,
+            price: item.price,
+            categoryId: item.categoryId,
+            badge: item.badge,
+            isActive: item.isActive,
+            displayOrder: item.displayOrder,
+            imageId: item.imageId,
+            imageUrl: item.imageUrl,
+          })}
+          onDelete={deleteItem}
+        />
+      ) : (
+        <div className="space-y-8">
+          {categories.map((cat) => {
+            const catItems = items.filter((i) => i.categoryId === cat._id);
+            if (catItems.length === 0) return null;
+            return (
+              <div key={cat._id}>
+                <h3 className="mb-3 flex items-center gap-2 text-sm font-bold uppercase tracking-wider text-[var(--text-secondary)]">
+                  {cat.name}
+                  <span className="text-xs font-normal text-[var(--text-muted)]">
+                    ({catItems.length})
+                  </span>
+                </h3>
+                <CategoryReorderGroup
+                  items={catItems}
+                  categoryMap={categoryMap}
+                  onReorder={reorderItems}
+                  onToggleActive={toggleActive}
+                  onEdit={(item) => setEditingItem({
+                    _id: item._id,
+                    name: item.name,
+                    description: item.description,
+                    price: item.price,
+                    categoryId: item.categoryId,
+                    badge: item.badge,
+                    isActive: item.isActive,
+                    displayOrder: item.displayOrder,
+                    imageId: item.imageId,
+                    imageUrl: item.imageUrl,
+                  })}
+                  onDelete={deleteItem}
                 />
-              ) : (
-                <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-[var(--donut-pink-soft)] text-lg">
-                  {categoryMap.get(item.categoryId)?.includes("Smoothie") || categoryMap.get(item.categoryId)?.includes("Milk Tea")
-                    ? "☕"
-                    : categoryMap.get(item.categoryId)?.includes("Bundle")
-                      ? "🎁"
-                      : "🍩"}
-                </div>
-              )}
-
-              <div className="min-w-0 flex-1">
-                <div className="flex items-center gap-2">
-                  <p className="truncate font-semibold text-[var(--text-primary)]">
-                    {item.name}
-                  </p>
-                  {item.badge && <Badge type={item.badge} />}
-                </div>
-                <p className="truncate text-xs text-[var(--text-muted)]">
-                  {categoryMap.get(item.categoryId) ?? "Unknown"} ·{" "}
-                  {item.description}
-                </p>
               </div>
-
-              <p className="shrink-0 font-bold text-[var(--donut-pink)]">
-                {formatPrice(item.price)}
-              </p>
-
-              <div className="flex shrink-0 gap-1">
-                <button
-                  type="button"
-                  onClick={() => toggleActive(item._id, item.isActive)}
-                  className="rounded-lg p-2 text-[var(--text-muted)] transition hover:bg-[var(--donut-pink-soft)]"
-                  title={item.isActive ? "Hide item" : "Show item"}
-                >
-                  {item.isActive ? <Eye size={16} /> : <EyeOff size={16} />}
-                </button>
-                <button
-                  type="button"
-                  onClick={() =>
-                    setEditingItem({
-                      _id: item._id,
-                      name: item.name,
-                      description: item.description,
-                      price: item.price,
-                      categoryId: item.categoryId,
-                      badge: item.badge,
-                      isActive: item.isActive,
-                      displayOrder: item.displayOrder,
-                      imageId: item.imageId,
-                      imageUrl: item.imageUrl,
-                    })
-                  }
-                  className="rounded-lg p-2 text-[var(--text-muted)] transition hover:bg-[var(--donut-pink-soft)]"
-                  title="Edit"
-                >
-                  <Pencil size={16} />
-                </button>
-                <button
-                  type="button"
-                  onClick={() => deleteItem(item._id)}
-                  className="rounded-lg p-2 text-[var(--text-muted)] transition hover:bg-red-50 hover:text-red-500"
-                  title="Delete"
-                >
-                  <Trash2 size={16} />
-                </button>
-              </div>
-            </motion.div>
-          ))}
-        </AnimatePresence>
-      </div>
+            );
+          })}
+        </div>
+      )}
 
       {/* Edit/Add Modal */}
       <AnimatePresence>
