@@ -156,6 +156,16 @@ function MenuPage() {
         {/* Menu Grid */}
         {filtered === undefined ? (
           <DonutSpinner className="mt-16" />
+        ) : activeCategory !== "all" && filtered.length === 0 ? (
+          <div className="mt-16 flex flex-col items-center text-center">
+            <span className="text-4xl">🍩</span>
+            <p className="mt-3 text-lg font-semibold text-[var(--text-primary)]">
+              No items in this category
+            </p>
+            <p className="mt-1 text-sm text-[var(--text-muted)]">
+              Check back soon — we're always adding new treats!
+            </p>
+          </div>
         ) : activeCategory !== "all" ? (
           /* Single category — flat grid */
           <div className="mt-10 grid gap-5 sm:grid-cols-2 lg:grid-cols-3">

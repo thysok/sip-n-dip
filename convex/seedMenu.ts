@@ -56,7 +56,7 @@ export const run = mutation({
 
     // ─── Donuts ───
     let order = 0;
-    const glazeId = await ctx.db.insert("menuItems", {
+    await ctx.db.insert("menuItems", {
       name: "Glaze Donut",
       description: "Soft, ring-shaped pastry with a smooth, sweet glaze.",
       price: 1.69,
@@ -231,7 +231,7 @@ export const run = mutation({
 
     // ─── Pastries ───
     order = 0;
-    const appleFritterId = await ctx.db.insert("menuItems", {
+    await ctx.db.insert("menuItems", {
       name: "Apple Fritter",
       description: "Chunks of apple and cinnamon embedded in a sweet, crispy dough, coated with a light glaze.",
       price: 2.99,

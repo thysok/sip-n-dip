@@ -26,7 +26,7 @@ const SIDEBAR_LINKS = [
 ];
 
 function AdminLayout() {
-  const [isLoggedIn, setIsLoggedIn] = useState(true);
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [loginForm, setLoginForm] = useState({ email: "", password: "" });
 

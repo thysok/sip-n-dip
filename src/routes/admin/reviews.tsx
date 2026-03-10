@@ -65,6 +65,7 @@ function AdminReviewsPage() {
   };
 
   const deleteReview = async (id: Id<"reviews">) => {
+    if (!window.confirm("Are you sure you want to delete this?")) return;
     await removeReview({ id });
   };
 

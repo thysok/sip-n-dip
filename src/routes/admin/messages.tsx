@@ -130,7 +130,10 @@ function AdminMessagesPage() {
                   </button>
                   <button
                     type="button"
-                    onClick={() => removeMessage({ id: msg._id })}
+                    onClick={() => {
+                      if (!window.confirm("Are you sure you want to delete this?")) return;
+                      removeMessage({ id: msg._id });
+                    }}
                     className="flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-xs font-medium text-[var(--text-muted)] transition hover:bg-red-50 hover:text-red-500"
                   >
                     <Trash2 size={14} /> Delete

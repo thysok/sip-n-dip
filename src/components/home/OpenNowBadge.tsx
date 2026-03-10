@@ -1,5 +1,7 @@
 import { motion } from "framer-motion";
 import { useMemo } from "react";
+import { useQuery } from "convex/react";
+import { api } from "../../../convex/_generated/api";
 
 const DEFAULT_HOURS: Record<number, [number, number]> = {
   0: [7, 13],    // Sunday 7am-1pm
@@ -11,15 +13,57 @@ const DEFAULT_HOURS: Record<number, [number, number]> = {
   6: [6, 15],    // Saturday 6am-3pm
 };
 
+const DAY_NAMES = ["sunday", "monday", "tuesday", "wednesday", "thursday", "friday", "saturday"];
+
+function parseTimeRange(str: string): [number, number] | null {
+  // Parses "6:00 AM – 2:00 PM" into [6, 14]
+  const parts = str.split(/\s*[–-]\s*/);
+  if (parts.length !== 2) return null;
+  const parse12h = (t: string): number | null => {
+    const m = t.trim().match(/^(\d{1,2}):(\d{2})\s*(AM|PM)$/i);
+    if (!m) return null;
+    let h = parseInt(m[1], 10);
+    const ampm = m[3].toUpperCase();
+    if (ampm === "PM" && h !== 12) h += 12;
+    if (ampm === "AM" && h === 12) h = 0;
+    return h;
+  };
+  const open = parse12h(parts[0]);
+  const close = parse12h(parts[1]);
+  if (open === null || close === null) return null;
+  return [open, close];
+}
+
 export default function OpenNowBadge() {
+  const settings = useQuery(api.shopSettings.getAll);
+
   const isOpen = useMemo(() => {
     const now = new Date();
     const day = now.getDay();
     const hour = now.getHours();
+
+    // Try to use hours from Convex settings
+    if (settings?.hours) {
+      try {
+        const hoursMap = JSON.parse(settings.hours);
+        const dayName = DAY_NAMES[day];
+        const dayStr = hoursMap[dayName];
+        if (dayStr && dayStr.toLowerCase() !== "closed") {
+          const range = parseTimeRange(dayStr);
+          if (range) return hour >= range[0] && hour < range[1];
+        } else if (dayStr && dayStr.toLowerCase() === "closed") {
+          return false;
+        }
+      } catch {
+        // Fall through to defaults
+      }
+    }
+
+    // Fall back to hardcoded defaults
     const range = DEFAULT_HOURS[day];
     if (!range) return false;
     return hour >= range[0] && hour < range[1];
-  }, []);
+  }, [settings?.hours]);
 
   return (
     <motion.div

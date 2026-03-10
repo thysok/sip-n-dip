@@ -193,7 +193,10 @@ function AdminAboutPage() {
                 </button>
                 <button
                   type="button"
-                  onClick={() => removeMember({ id: member._id })}
+                  onClick={() => {
+                    if (!window.confirm("Are you sure you want to delete this?")) return;
+                    removeMember({ id: member._id });
+                  }}
                   className="rounded-lg p-2 text-[var(--text-muted)] hover:bg-red-50 hover:text-red-500"
                 >
                   <Trash2 size={16} />

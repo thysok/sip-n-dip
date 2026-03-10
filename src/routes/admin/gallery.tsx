@@ -36,6 +36,7 @@ function AdminGalleryPage() {
   };
 
   const deletePhoto = async (id: Id<"galleryPhotos">) => {
+    if (!window.confirm("Are you sure you want to delete this?")) return;
     await removePhoto({ id });
   };
 

@@ -169,6 +169,7 @@ function AdminMenuPage() {
   };
 
   const deleteItem = async (id: Id<"menuItems">) => {
+    if (!window.confirm("Are you sure you want to delete this?")) return;
     await removeItem({ id });
   };
 

@@ -2,8 +2,8 @@ export function cn(...classes: (string | false | null | undefined)[]) {
   return classes.filter(Boolean).join(" ");
 }
 
-export function formatPrice(cents: number): string {
-  return `$${cents.toFixed(2)}`;
+export function formatPrice(price: number): string {
+  return `$${price.toFixed(2)}`;
 }
 
 export function formatDate(dateStr: string): string {

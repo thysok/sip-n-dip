@@ -15,7 +15,7 @@ export const list = query({
       })
     );
 
-    return items.filter(Boolean);
+    return items.filter((item): item is NonNullable<typeof item> => item !== null);
   },
 });
 
