@@ -1,5 +1,6 @@
 import {
   HeadContent,
+  Link,
   Outlet,
   Scripts,
   createRootRoute,
@@ -86,6 +87,7 @@ export const Route = createRootRoute({
   }),
   component: RootComponent,
   shellComponent: RootDocument,
+  notFoundComponent: NotFound,
 });
 
 function RootDocument({ children }: { children: React.ReactNode }) {
@@ -104,6 +106,23 @@ function RootDocument({ children }: { children: React.ReactNode }) {
         <Scripts />
       </body>
     </html>
+  );
+}
+
+function NotFound() {
+  return (
+    <main className="flex flex-col items-center justify-center px-4 py-24 text-center">
+      <span className="text-7xl">🍩</span>
+      <h1 className="mt-6 text-4xl font-bold text-[var(--text-primary)]">
+        Page Not Found
+      </h1>
+      <p className="mt-3 text-lg text-[var(--text-muted)]">
+        Looks like this page got dunked and disappeared!
+      </p>
+      <Link to="/" className="btn-primary mt-8">
+        Back to Home
+      </Link>
+    </main>
   );
 }
 

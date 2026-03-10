@@ -1,5 +1,5 @@
 import { motion } from "framer-motion";
-import { useMemo } from "react";
+import { useMemo, useState, useEffect } from "react";
 
 const SPRINKLE_COLORS = [
   "var(--donut-pink)",
@@ -23,7 +23,14 @@ interface Sprinkle {
 }
 
 export default function FloatingSprinkles({ count = 24 }: { count?: number }) {
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
   const sprinkles = useMemo<Sprinkle[]>(() => {
+    if (!mounted) return [];
     return Array.from({ length: count }, (_, i) => ({
       id: i,
       x: Math.random() * 100,
@@ -35,7 +42,9 @@ export default function FloatingSprinkles({ count = 24 }: { count?: number }) {
       rotate: Math.random() * 360,
       shape: Math.random() > 0.4 ? "rod" : "circle",
     }));
-  }, [count]);
+  }, [count, mounted]);
+
+  if (!mounted) return null;
 
   return (
     <div className="pointer-events-none absolute inset-0 overflow-hidden" aria-hidden>
